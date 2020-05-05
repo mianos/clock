@@ -1,36 +1,54 @@
-import datetime
+#!/usr/bin/env python
+from gevent import monkey
+monkey.patch_all(subprocess=True)
+import arrow
 import requests
+import re
+import logging
+
+import gevent
+from gevent.pywsgi import WSGIServer
+
 
 from flask import Flask, render_template, jsonify
 from bs4 import BeautifulSoup
+
+# from flask.logging import default_handler
+
 
 class YourFlask(Flask):
     def create_jinja_environment(self):
         self.config['TEMPLATES_AUTO_RELOAD'] = True
         return Flask.create_jinja_environment(self)
 
+def timer():
+    while True:
+        gevent.sleep(10)
+
+# gevent.spawn(timer)
 app = YourFlask(__name__)
+app.config['DEBUG'] = False
+#app.logger.removeHandler(default_handler)
 
 @app.route('/')
 def hello_world():
     return render_template('clock.html')
 
 
-last_request = datetime.datetime(datetime.MINYEAR, 1, 1)
+last_request = arrow.Arrow.min
 wdata = None
 
 @app.route('/time')
 def time():
     global last_request, wdata
 
-    now = datetime.datetime.now()
-    timestr = now.strftime('%l:%M')
+    now = arrow.now()
+    timestr = now.format('h:mm')
     if now.second % 2:
         tt = timestr.replace(':', '.')
     else:
             tt = timestr
     if (now - last_request).seconds > 60 * 15:
-        print "request"
         wdata = requests.get("http://rss.weatherzone.com.au/?u=12994-1285&lt=aploc&lc=624&obs=1&fc=1").text
         last_request = now
 
@@ -39,6 +57,14 @@ def time():
         return BeautifulSoup(aa.description.contents[0], 'html.parser').text.replace('\r', '').split('\n')
     temp = clean(items[0])
     forecast = clean(items[1])
-    temp_line = ' '.join([temp[1], temp[4]])
+    temp_line = "<strong>%s</strong>      <small>(%s)</small>" % (re.match("Temperature: (.*)$", temp[1]).groups()[0], re.match("Feels like: (.*)$", temp[4]).groups()[0])
     forecast_line = ' '.join(forecast[3:5])
-    return jsonify(time=tt, date=now.strftime('%d %b'), temp=temp_line, forecast=forecast_line)
+    return jsonify(time=tt,
+                   date="%s (sk %s)" % (now.strftime('%d %b'), arrow.now("Europe/Bratislava").format("h:mma")),
+                   temp=temp_line,
+                   forecast=forecast_line)
+
+
+
+if __name__ == '__main__':
+    http_server = wsgi.WSGIServer(('', 5000), app, log=None).serve_forever()

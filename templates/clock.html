@@ -1,0 +1,51 @@
+<html>
+    <head>
+       <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Clock</title>
+
+        <!--        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+         <link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="{{url_for('static', filename='js/jquery.fittext.js')}}"></script>
+    </head>
+    <body>
+	<div class="container">
+		<div class="row" style="line-height: 160px">
+			<div id='clocktext' class="text-center" style="vertical-align: bottom;">00:00</div>
+		</div>
+		<div class="row">
+		    <div id='temperature' class="text-center">Temp</div>
+		</div>
+		<div class="row">
+		    <div id='forecast' class="text-center">Temp</div>
+		</div>
+		<div class="row">
+			<div id='datetext' class="text-center">30 Dec</div>
+		 </div>
+	</div>
+    <script>
+        var nn = 1;
+
+        function set_clock() {
+			$.getJSON( "/time", function( data ) {
+
+				$('#clocktext').text(data.time);
+			    $("#datetext").text(data.date);
+			    $("#temperature").html(data.temp);
+			    $("#forecast").html(data.forecast);
+			});
+            setTimeout(set_clock, 3300);
+			nn = nn + 1;
+       }
+
+        $("#clocktext").fitText(0.4);
+        $("#temperature").fitText(1.5);
+        $("#forecast").fitText(3.0);
+        $("#datetext").fitText(2.0);
+        set_clock()
+    </script>
+    </body>
+
+</html>
