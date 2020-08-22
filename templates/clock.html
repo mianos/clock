@@ -5,6 +5,7 @@
 
         <!--        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
          <link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+	 <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -13,10 +14,13 @@
     <body>
 	<div class="container">
 		<div class="row" style="line-height: 160px">
-			<div id='clocktext' class="text-center" style="vertical-align: bottom;">00:00</div>
+			 <div id='clocktext' class="text-center" style="vertical-align: bottom;">00:00</div> 
 		</div>
 		<div class="row">
 		    <div id='temperature' class="text-center">Temp</div>
+		</div>
+		<div class="row">
+			<div id='pm25' class="text-center">pm25</div>
 		</div>
 		<div class="row">
 		    <div id='forecast' class="text-center">Temp</div>
@@ -32,16 +36,18 @@
 			$.getJSON( "/time", function( data ) {
 
 				$('#clocktext').text(data.time);
-			    $("#datetext").text(data.date);
-			    $("#temperature").html(data.temp);
-			    $("#forecast").html(data.forecast);
+			  $("#datetext").text(data.date);
+			   $("#pm25").html(data.pm25);
+			   $("#temperature").html(data.temp);
+			   $("#forecast").html(data.forecast);
 			});
-            setTimeout(set_clock, 3300);
+            setTimeout(set_clock, 60000);
 			nn = nn + 1;
        }
 
         $("#clocktext").fitText(0.4);
         $("#temperature").fitText(1.5);
+        $("#pm25").fitText(3.0);
         $("#forecast").fitText(3.0);
         $("#datetext").fitText(2.0);
         set_clock()
